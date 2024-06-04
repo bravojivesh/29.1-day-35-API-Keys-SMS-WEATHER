@@ -1,10 +1,16 @@
+#JH: will only work if the vn variables are set correctly.
+
+import os
 import requests
+from twilio.base.exceptions import TwilioRestException
 from twilio.rest import Client
 
-#example to directly put on the browser:
-#https://api.openweathermap.org/data/2.5/weather?id=1283240&appid=3fec4128de11da9ba4eae18407bf4cc1
+#website: https://openweathermap.org/forecast5
 
+url="https://api.openweathermap.org/data/2.5/forecast/"
 
+#if you need raw value check google drive>password>sheet 6
+api_key=os.environ.get("jh_api")
 
 params={
             "lon": 85.316666,
@@ -27,20 +33,36 @@ print (data)
 # print (data["list"][1]["weather"])
 
 will_rain=False
+
 for per_hour in data["list"]: #loop through all hourly data
     row_with_id=per_hour["weather"]
     id_only=row_with_id[0]["id"]
     if id_only < 700:
        will_rain=True
 
+
+sid=os.environ.get("jh_sid")
+token=os.environ.get("jh_token")
+
+from_phone= "+16315935727",
+to_phone= "+9779828026885"
+
+client1=Client(sid, token)
+
 if will_rain==True:
-    #print ("Bring your umbrella")
+    print ("Bring your umbrella")
     #NEED TO UNCOMMENT THIS:client = Client(twilio_SID,twilio_token)
 
-    message = client.messages \
-        .create(
-        body='This is the ship that made the Kessel Run in fourteen parsecs?',
-        from_="+16315935727",
-        to="+9779828026885"
-    )
+    try:
+        message = client1.messages.create(
+            body="hi Jose",
+            from_=from_phone,
+            to=to_phone
+        )
+        print(f"Message sent! SID: {message.sid}")
+    except TwilioRestException as e:
+        print(f"Twilio error occurred: {e}")
+    except Exception as e:
+        print(f"An error occurred: {e}")
+
     print(message.status)
